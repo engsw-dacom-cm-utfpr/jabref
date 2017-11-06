@@ -27,7 +27,7 @@ import java.util.Set;
 public class CrossRefAction extends MnemonicAwareAction {
   private static final Log LOGGER = LogFactory.getLog(CrossRefAction.class);
   private static final String SOURCE_TYPE = "inproceedings";
-  private static final String TARGET_TYPE = "article";
+  private static final String TARGET_TYPE = "proceedings";
 
   private final JabRefFrame jabRefFrame;
 
@@ -56,6 +56,8 @@ public class CrossRefAction extends MnemonicAwareAction {
               System.out.println("Finding relatives of [" + entry.getId() + "]");
 
               List<BibEntry> relatives = findRelatives(entry, entries);
+
+              if (relatives == null) continue;
 
               if (!relatives.isEmpty()) {
                 mapping.put(entry, relatives);
@@ -136,7 +138,7 @@ public class CrossRefAction extends MnemonicAwareAction {
     System.out.println("Cite key part=\"" + citeKeyPart + "\"; cite key = \"" + citeKey + "\"");
     foundBookTitle.ifPresent(s -> entry.setField(FieldName.TITLE, s));
     entry.setCiteKey(citeKey.toString());
-    entry.setId(IdGenerator.next()); // TODO
+    entry.setId(IdGenerator.next());
     sources.forEach(source -> source.setField(FieldName.CROSSREF, entry.getCiteKeyOptional().orElse("unknown")));
     System.out.println("Crossref=\"" + entry.getCiteKeyOptional().orElse("unknown") + "\"");
 
@@ -178,7 +180,11 @@ public class CrossRefAction extends MnemonicAwareAction {
       bookTitleOptional = entry.getField(FieldName.JOURNAL);
     }
 
-    String bookTitle = bookTitleOptional.orElseThrow(() -> new IllegalArgumentException("Entry doesn't have a " + FieldName.BOOKTITLE + " or " + FieldName.JOURNAL + " field"));
+    if (!bookTitleOptional.isPresent()) {
+      return null;
+    }
+
+    String bookTitle = bookTitleOptional.get();
 
     for (BibEntry e : entries) {
       if (e != entry && e.getType().equalsIgnoreCase(SOURCE_TYPE)) {
