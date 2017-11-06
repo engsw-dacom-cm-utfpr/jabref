@@ -242,6 +242,10 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
             Localization.lang("Back"), Globals.getKeyPrefs().getKey(KeyBinding.BACK), IconTheme.JabRefIcon.LEFT.getIcon());
     private final AbstractAction deleteEntry = new GeneralAction(Actions.DELETE, Localization.menuTitle("Delete entry"),
             Localization.lang("Delete entry"), Globals.getKeyPrefs().getKey(KeyBinding.DELETE_ENTRY), IconTheme.JabRefIcon.DELETE_ENTRY.getIcon());
+    // cross ref
+    private final AbstractAction crossref = new GeneralAction(Actions.CROSS_REF, Localization.menuTitle("CrossRef"),
+            Localization.lang("CrossRef"), null, IconTheme.JabRefIcon.ADD.getIcon());
+
     private final AbstractAction copy = new EditAction(Actions.COPY, Localization.menuTitle("Copy"),
             Localization.lang("Copy"), Globals.getKeyPrefs().getKey(KeyBinding.COPY), IconTheme.JabRefIcon.COPY.getIcon());
     private final AbstractAction paste = new EditAction(Actions.PASTE, Localization.menuTitle("Paste"),
@@ -1038,6 +1042,7 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
         JMenu search = JabRefFrame.subMenu(Localization.menuTitle("Search"));
         JMenu groups = JabRefFrame.subMenu(Localization.menuTitle("Groups"));
         JMenu bibtex = JabRefFrame.subMenu("&BibTeX");
+//        JMenu crossRef = JabRefFrame.subMenu("CrossRef");
         JMenu quality = JabRefFrame.subMenu(Localization.menuTitle("Quality"));
         JMenu view = JabRefFrame.subMenu(Localization.menuTitle("View"));
         JMenu tools = JabRefFrame.subMenu(Localization.menuTitle("Tools"));
@@ -1205,7 +1210,10 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
         bibtex.add(customizeAction);
         bibtex.addSeparator();
         bibtex.add(deleteEntry);
+        bibtex.add(crossref);
         mb.add(bibtex);
+
+//        mb.add(crossRef);
 
         quality.add(dupliCheck);
         quality.add(mergeEntries);
