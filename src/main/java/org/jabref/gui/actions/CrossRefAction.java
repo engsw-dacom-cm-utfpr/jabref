@@ -79,11 +79,11 @@ public class CrossRefAction extends MnemonicAwareAction {
             System.out.println("All related:");
             related.forEach(rel -> System.out.println(rel.getId() + " => " + rel.getTitle()));
 
-            BibEntry conference = buildConference(related);
+            BibEntry generated = buildConference(related);
 
             System.out.println("Generated " + TARGET_TYPE + "...");
-            System.out.println(conference);
-            context.getDatabase().insertEntry(conference);
+            System.out.println(generated);
+            context.getDatabase().insertEntry(generated);
           }
         } catch (Throwable ex) {
           LOGGER.error("Problem with generating cross-references...", ex);
