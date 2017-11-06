@@ -87,7 +87,9 @@ public class CrossRefAction extends MnemonicAwareAction {
 
             System.out.println("Entries review:");
 
-            
+            for (BibEntry entry : entries) {
+              System.out.println(entry);
+            }
 
             EventQueue.invokeLater(() -> {
               System.out.println("Adding to database...");
@@ -192,7 +194,7 @@ public class CrossRefAction extends MnemonicAwareAction {
   }
 
   private String generateRandomCiteKeyPart() {
-    char[] array = new char[10];
+    char[] array = new char[5];
     Random random = new Random();
 
     for (int i = 0; i < array.length; i++) {
@@ -207,7 +209,7 @@ public class CrossRefAction extends MnemonicAwareAction {
     int match = 0;
 
     for (String word : words) {
-      if (eBookTitle.contains(word)) {
+      if (eBookTitle.toLowerCase().contains(word.toLowerCase())) {
         match++;
       }
     }
