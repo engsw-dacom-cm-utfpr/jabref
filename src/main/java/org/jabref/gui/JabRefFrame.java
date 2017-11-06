@@ -242,9 +242,9 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
             Localization.lang("Back"), Globals.getKeyPrefs().getKey(KeyBinding.BACK), IconTheme.JabRefIcon.LEFT.getIcon());
     private final AbstractAction deleteEntry = new GeneralAction(Actions.DELETE, Localization.menuTitle("Delete entry"),
             Localization.lang("Delete entry"), Globals.getKeyPrefs().getKey(KeyBinding.DELETE_ENTRY), IconTheme.JabRefIcon.DELETE_ENTRY.getIcon());
-
-    private final AbstractAction crossref = new GeneralAction(Actions.DELETE, Localization.menuTitle("Delete entry"),
-            Localization.lang("CrossRef"), Globals.getKeyPrefs().getKey(KeyBinding.DELETE_ENTRY), IconTheme.JabRefIcon.DELETE_ENTRY.getIcon());
+    // cross ref
+    private final AbstractAction crossref = new GeneralAction(Actions.CROSS_REF, Localization.menuTitle("CrossRef"),
+            Localization.lang("CrossRef"), null, IconTheme.JabRefIcon.ADD.getIcon());
 
     private final AbstractAction copy = new EditAction(Actions.COPY, Localization.menuTitle("Copy"),
             Localization.lang("Copy"), Globals.getKeyPrefs().getKey(KeyBinding.COPY), IconTheme.JabRefIcon.COPY.getIcon());
