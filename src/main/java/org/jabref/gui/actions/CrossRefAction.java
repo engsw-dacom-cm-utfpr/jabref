@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 public class CrossRefAction extends MnemonicAwareAction {
   private static final Log LOGGER = LogFactory.getLog(NewEntryAction.class);
@@ -66,6 +67,27 @@ public class CrossRefAction extends MnemonicAwareAction {
     }
   }
 
+  private BibEntry buildConference(List<BibEntry> sources) {
+    BibEntry entry = new BibEntry("conference");
+    String[] fields = { "address", "booktitle", "isbn", "location", "month", "publisher", "year" };
+
+    for (String field : fields) {
+      Optional<String> value = findField(sources, field);
+
+      value.ifPresent(val -> entry.setField(field, val));
+      sources.forEach(source -> source.clearField(field));
+    }
+
+    Optional<String> foundBookTitle = entry.getField("booktitle");
+
+    foundBookTitle.ifPresent(s -> entry.setField("title", s));
+    entry.setCiteKey("proceedings:" + generateRandomCiteKeyPart() + ":YEAR");
+    entry.setId("rand_id"); // TODO
+    sources.forEach(source -> source.setField("crossref", entry.getCiteKeyOptional().orElse("unknown")));
+
+    return entry;
+  }
+
   private void compoundRelatives(BibEntry entry, Map<BibEntry, List<BibEntry>> mapping, List<BibEntry> output) {
     List<BibEntry> relatives = mapping.get(entry);
 
@@ -79,6 +101,18 @@ public class CrossRefAction extends MnemonicAwareAction {
     for (BibEntry relative : relatives) {
       compoundRelatives(relative, mapping, output);
     }
+  }
+
+  private Optional<String> findField(List<BibEntry> entries, String fieldName) {
+    for (BibEntry entry : entries) {
+      Optional<String> value = entry.getField(fieldName);
+
+      if (value.isPresent()) {
+        return value;
+      }
+    }
+
+    return Optional.empty();
   }
 
   private List<BibEntry> findRelatives(BibEntry entry, List<BibEntry> entries) {
@@ -96,6 +130,17 @@ public class CrossRefAction extends MnemonicAwareAction {
     }
 
     return result;
+  }
+
+  private String generateRandomCiteKeyPart() {
+    char[] array = new char[10];
+    Random random = new Random();
+
+    for (int i = 0; i < array.length; i++) {
+      array[i] = (char) ('a' + random.nextInt(26));
+    }
+
+    return new String(array);
   }
 
   private boolean isBookTitleRelative(String bookTitle, String eBookTitle) {
