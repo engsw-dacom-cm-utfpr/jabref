@@ -9,6 +9,7 @@ import org.jabref.logic.l10n.Localization;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntry;
 import org.jabref.model.entry.FieldName;
+import org.jabref.model.entry.IdGenerator;
 
 import javax.swing.Action;
 import javax.swing.JTabbedPane;
@@ -26,7 +27,7 @@ import java.util.Set;
 public class CrossRefAction extends MnemonicAwareAction {
   private static final Log LOGGER = LogFactory.getLog(CrossRefAction.class);
   private static final String SOURCE_TYPE = "inproceedings";
-  private static final String TARGET_TYPE = "proceedings";
+  private static final String TARGET_TYPE = "article";
 
   private final JabRefFrame jabRefFrame;
 
@@ -83,7 +84,16 @@ public class CrossRefAction extends MnemonicAwareAction {
 
             System.out.println("Generated " + TARGET_TYPE + "...");
             System.out.println(generated);
-            context.getDatabase().insertEntry(generated);
+
+            System.out.println("Entries review:");
+
+            
+
+            EventQueue.invokeLater(() -> {
+              System.out.println("Adding to database...");
+              context.getDatabase().insertEntry(generated);
+              System.out.println("Done.");
+            });
           }
         } catch (Throwable ex) {
           LOGGER.error("Problem with generating cross-references...", ex);
@@ -124,7 +134,7 @@ public class CrossRefAction extends MnemonicAwareAction {
     System.out.println("Cite key part=\"" + citeKeyPart + "\"; cite key = \"" + citeKey + "\"");
     foundBookTitle.ifPresent(s -> entry.setField(FieldName.TITLE, s));
     entry.setCiteKey(citeKey.toString());
-    entry.setId(citeKeyPart + "_id"); // TODO
+    entry.setId(IdGenerator.next()); // TODO
     sources.forEach(source -> source.setField(FieldName.CROSSREF, entry.getCiteKeyOptional().orElse("unknown")));
     System.out.println("Crossref=\"" + entry.getCiteKeyOptional().orElse("unknown") + "\"");
 
