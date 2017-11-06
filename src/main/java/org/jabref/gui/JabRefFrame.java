@@ -1,83 +1,14 @@
 package org.jabref.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.GraphicsEnvironment;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.MouseAdapter;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.TimerTask;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JProgressBar;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JToggleButton;
-import javax.swing.KeyStroke;
-import javax.swing.MenuElement;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
-import javax.swing.UIManager;
-import javax.swing.WindowConstants;
-
+import com.google.common.eventbus.Subscribe;
+import com.jgoodies.looks.HeaderStyle;
+import com.jgoodies.looks.Options;
 import javafx.application.Platform;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jabref.Globals;
 import org.jabref.JabRefExecutorService;
-import org.jabref.gui.actions.Actions;
-import org.jabref.gui.actions.AutoLinkFilesAction;
-import org.jabref.gui.actions.ConnectToSharedDatabaseAction;
-import org.jabref.gui.actions.ErrorConsoleAction;
-import org.jabref.gui.actions.IntegrityCheckAction;
-import org.jabref.gui.actions.LookupIdentifierAction;
-import org.jabref.gui.actions.ManageKeywordsAction;
-import org.jabref.gui.actions.MassSetFieldAction;
-import org.jabref.gui.actions.MnemonicAwareAction;
-import org.jabref.gui.actions.NewDatabaseAction;
-import org.jabref.gui.actions.NewEntryAction;
-import org.jabref.gui.actions.NewSubDatabaseAction;
-import org.jabref.gui.actions.OpenBrowserAction;
-import org.jabref.gui.actions.SearchForUpdateAction;
-import org.jabref.gui.actions.SortTabsAction;
+import org.jabref.gui.actions.*;
 import org.jabref.gui.autosaveandbackup.AutosaveUIManager;
 import org.jabref.gui.bibtexkeypattern.BibtexKeyPatternDialog;
 import org.jabref.gui.customentrytypes.EntryCustomizationDialog;
@@ -140,13 +71,22 @@ import org.jabref.model.entry.specialfields.SpecialField;
 import org.jabref.preferences.JabRefPreferences;
 import org.jabref.preferences.LastFocusedTabPreferences;
 import org.jabref.preferences.SearchPreferences;
-
-import com.google.common.eventbus.Subscribe;
-import com.jgoodies.looks.HeaderStyle;
-import com.jgoodies.looks.Options;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import osx.macadapter.MacAdapter;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.MouseAdapter;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.List;
 
 /**
  * The main window of the application.
@@ -425,6 +365,7 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
     private final AutoLinkFilesAction autoLinkFile = new AutoLinkFilesAction();
     // The action for adding a new entry of unspecified type.
     private final NewEntryAction newEntryAction = new NewEntryAction(this, Globals.getKeyPrefs().getKey(KeyBinding.NEW_ENTRY));
+    private final CrossRefAction crossRefAction = new CrossRefAction(this);
     private final List<NewEntryAction> newSpecificEntryAction = getNewEntryActions();
     // The action for closing the current database and leaving the window open.
     private final CloseDatabaseAction closeDatabaseAction = new CloseDatabaseAction();
@@ -1197,6 +1138,7 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
         bibtex.add(newSpec);
 
         bibtex.add(plainTextImport);
+        bibtex.add(crossRefAction);
         bibtex.addSeparator();
         bibtex.add(editEntry);
         bibtex.add(editPreamble);
@@ -1409,7 +1351,7 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
                 groupSidePane.getToggleAction(), makeKeyAction, normalSearch, generalFetcher.getToggleAction(), mergeEntries, cleanupEntries, exportToClipboard, replaceAll,
                 sendAsEmail, downloadFullText, lookupIdentifiers, writeXmpAction, openOfficePanel.getToggleAction(), findUnlinkedFiles, addToGroup, removeFromGroup,
                 moveToGroup, autoLinkFile, resolveDuplicateKeys, openUrl, openFolder, openFile, togglePreview,
-                dupliCheck, autoSetFile, newEntryAction, newSpec, customizeAction, plainTextImport, getMassSetField(), getManageKeywords(),
+                dupliCheck, autoSetFile, newEntryAction, crossRefAction, newSpec, customizeAction, plainTextImport, getMassSetField(), getManageKeywords(),
                 pushExternalButton.getMenuAction(), closeDatabaseAction, getNextPreviewStyleAction(), getPreviousPreviewStyleAction(), checkIntegrity,
                 databaseProperties, abbreviateIso, abbreviateMedline,
                 unabbreviate, exportAll, exportSelected, importCurrent, saveAll, focusTable, increaseFontSize, decreseFontSize, defaultFontSize,
