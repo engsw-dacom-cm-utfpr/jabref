@@ -13,7 +13,9 @@ import javax.swing.Action;
 import javax.swing.JTabbedPane;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class CrossRefAction extends MnemonicAwareAction {
@@ -36,8 +38,7 @@ public class CrossRefAction extends MnemonicAwareAction {
         BasePanel panel = (BasePanel) tabbedPane.getSelectedComponent();
         BibDatabaseContext context = panel.getBibDatabaseContext();
         ObservableList<BibEntry> entries = context.getDatabase().getEntries();
-
-        System.out.println("Got " + entries.size() + " entries");
+        Map<BibEntry, List<BibEntry>> mapping = new HashMap<>();
 
         for (BibEntry entry : entries) {
           if (entry.getType().equals("article")) {
@@ -45,16 +46,38 @@ public class CrossRefAction extends MnemonicAwareAction {
             Optional<String> bookTitle = entry.getField("booktitle");
             Optional<String> title = entry.getField("title");
             Optional<String> year = entry.getField("year");
+            List<BibEntry> relatives = findRelatives(entry, entries);
 
-            entry.clearField("booktitle");
-            // gera proceeding
-            // coloca booktitle
-            System.out.println(entry.getId() + " => " + entry.getType());
+            mapping.put(entry, relatives);
+            //entry.clearField("booktitle");
           }
+        }
+
+        while (!mapping.isEmpty()) {
+          List<BibEntry> related = new ArrayList<>();
+          BibEntry element = mapping.entrySet().iterator().next().getKey();
+
+          related.add(element);
+          compoundRelatives(element, mapping, related);
         }
       } catch (Throwable ex) {
         LOGGER.error("Problem with generating cross-references...", ex);
       }
+    }
+  }
+
+  private void compoundRelatives(BibEntry entry, Map<BibEntry, List<BibEntry>> mapping, List<BibEntry> output) {
+    List<BibEntry> relatives = mapping.get(entry);
+
+    if (relatives == null) {
+      return;
+    }
+
+    output.addAll(relatives);
+    mapping.remove(entry);
+
+    for (BibEntry relative : relatives) {
+      compoundRelatives(relative, mapping, output);
     }
   }
 
